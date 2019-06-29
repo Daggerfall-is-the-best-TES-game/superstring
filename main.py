@@ -1,3 +1,4 @@
+valid_scrabble_words = {word.strip() for word in open('enable1.txt', 'r')}
 
 
 def string_score(solution):
@@ -10,10 +11,5 @@ def string_score(solution):
                          'j': 8, 'x': 8,
                          'q': 10, 'z': 10}
         return sum(letter_scores[letter] for letter in word)
-
-    with open('enable1.txt', 'r') as valid_words:
-        return sum(score(valid_word.strip()) for valid_word in valid_words if valid_word.strip() in solution)
-
-
-print(string_score("aa"))
+    return sum(score(word) for word in valid_scrabble_words if word in solution)
 
