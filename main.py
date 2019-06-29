@@ -33,7 +33,7 @@ def make_solution():
     test_solution = ""
     while scrabble_tiles:
         best_tiles = ""
-        for tiles in set(permutations(scrabble_tiles, r=2)):
+        for tiles in set(permutations(scrabble_tiles, r=4)):
             new_solution = test_solution + "".join(tiles)
             if string_score(new_solution) > string_score(test_solution):
                 best_tiles = tiles
@@ -45,5 +45,7 @@ def make_solution():
 
 
 solution = make_solution()
+
 print(string_score(solution))
 print(solution)
+print(len(solution))
