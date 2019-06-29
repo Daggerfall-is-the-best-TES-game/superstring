@@ -1,4 +1,5 @@
-from random import sample
+from random import shuffle, choice
+from itertools import permutations
 
 
 valid_scrabble_words = {word.strip() for word in open('enable1.txt', 'r')}
@@ -28,16 +29,21 @@ def string_score(solution):
     return sum(score(word) for word in valid_scrabble_words if word in solution)  #TODO: word in solution must be modified to account for wildcards
 
 
-test_solution = ""
-while scrabble_tiles:
-    best_tile = scrabble_tiles[0]
-    for tile in set(scrabble_tiles):
-        new_solution = test_solution + tile
-        if string_score(new_solution) > string_score(test_solution):
-            best_tile = tile
-    test_solution += best_tile
-    scrabble_tiles.remove(best_tile)
-    print(test_solution)
+def make_solution():
+    test_solution = ""
+    while scrabble_tiles:
+        best_tiles = ""
+        for tiles in set(permutations(scrabble_tiles, r=2)):
+            new_solution = test_solution + "".join(tiles)
+            if string_score(new_solution) > string_score(test_solution):
+                best_tiles = tiles
+        test_solution += "".join(best_tiles)
+        for tile in best_tiles:
+            scrabble_tiles.remove(tile)
+        print(test_solution)
+    return test_solution
 
 
-print(string_score(test_solution))
+solution = make_solution()
+print(string_score(solution))
+print(solution)
