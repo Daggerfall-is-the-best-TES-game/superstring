@@ -1,4 +1,5 @@
 from random import shuffle, choice
+from collections import Counter
 from itertools import permutations
 from multiprocessing import Pool, freeze_support
 
@@ -51,7 +52,7 @@ class Solve:
             with Pool(8) as p:
                 while self.scrabble_tiles:
 
-                    possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=2)))
+                    possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=4)))
                     best_part = max(possible_part_list, key=part_value)
 
                     print(best_part)
@@ -69,4 +70,6 @@ if __name__ == '__main__':
 
     print(solver.string_score(solution))
     print(solution)
-    print(len(solution))
+    print(len(solution))  # our solution is the right length...
+    print(Counter(solution))
+    print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
