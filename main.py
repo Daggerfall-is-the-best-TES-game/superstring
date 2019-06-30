@@ -3,6 +3,8 @@ from collections import Counter
 from itertools import permutations
 from multiprocessing import Pool, freeze_support
 from cProfile import run
+from pickle import dump, load, HIGHEST_PROTOCOL
+from os.path import isfile
 
 
 class Solve:
@@ -29,7 +31,18 @@ class Solve:
                               'k': 5,
                               'j': 8, 'x': 8,
                               'q': 10, 'z': 10}
-        self.word_scores = {word: self.string_score(word) for word in self.valid_scrabble_words}
+
+        if not isfile("word scores.pkl"):
+            with Pool(8) as p:
+                self.word_scores = dict(
+                    zip(self.valid_scrabble_words, p.map(self.string_score, self.valid_scrabble_words)))
+            with open("word scores.pkl", 'wb') as file:
+                dump(self.word_scores, file, HIGHEST_PROTOCOL)
+        else:
+            with open("word scores.pkl", 'rb') as file:
+                self.word_scores = load(file)
+
+
 
     def string_score(self, solution):
         """solution is a string that is worth points
@@ -41,7 +54,7 @@ class Solve:
         """candidate_tiles is a tuple of 1 character strings which form a word when concatenated
         returns a tuple where the first item is candidate_tiles, and the second item is the point-value
         of the string that candidate_tiles represent"""
-        return candidate_tiles, self.word_scores[self.test_solution + "".join(candidate_tiles)]
+        return candidate_tiles, self.word_scores["".join(candidate_tiles)]
 
     def make_solution_method_1(self):
         """returns a string that is worth as many points as possible"""
