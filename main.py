@@ -41,8 +41,8 @@ class Solve:
     def evaluate_part(self, candidate_tiles):
         """candidate_tiles is a tuple of 1 character strings which form a word when concatenated
         returns a tuple where the first item is candidate_tiles, and the second item is the point-value
-        of the string that candidate_tiles represents"""
-        return candidate_tiles, self.string_score(self.test_solution + "".join(candidate_tiles))
+        of the string that candidate_tiles represents divided by the number of letters in the string"""
+        return candidate_tiles, self.string_score(self.test_solution + "".join(candidate_tiles)) / len(candidate_tiles)
 
     def make_solution_method_1(self):
         """returns a string that is worth as many points as possible"""
@@ -83,14 +83,16 @@ class Solve:
         with Pool(8) as p:
             while self.scrabble_tiles:
                 possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts())
-                best_part = max(possible_part_list, key=part_value)
+                while possible_part_list:
+                    best_part = max(possible_part_list, key=part_value)
 
-                print(best_part)
-                self.test_solution += "".join(get_part(best_part))
-                for tile in get_part(best_part):
-                    self.scrabble_tiles.remove(tile)
-                print(self.test_solution)
+                    print(best_part)
+                    self.test_solution += "".join(get_part(best_part))
+                    for tile in get_part(best_part):
+                        self.scrabble_tiles.remove(tile)
+                    print(self.test_solution)
         return self.test_solution
+
 
 if __name__ == '__main__':
     freeze_support()
@@ -105,4 +107,4 @@ if __name__ == '__main__':
 
 
 
-#best so far boxyowedhowshayspickoffsidescarpingoozedjinnimidemobiterageeventernevertoretaquantalariatailulugul??
+#best so far carboxymethylcellulosesforeshadowerspreformattingreawakenednonunionizedequipagedagobavatutiti
