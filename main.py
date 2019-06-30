@@ -73,3 +73,5 @@ if __name__ == '__main__':
     print(len(solution))  # our solution is the right length...
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+
+#best so far boxyowedhowshayspickoffsidescarpingoozedjinnimidemobiterageeventernevertoretaquantalariatailulugul??
