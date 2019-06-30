@@ -1,6 +1,6 @@
 from random import shuffle, choice
 from collections import Counter
-from itertools import permutations
+from itertools import permutations, product
 from multiprocessing import Pool, freeze_support
 from cProfile import run
 from pickle import dump, load, HIGHEST_PROTOCOL
@@ -36,7 +36,7 @@ class Solve:
         if not isfile("word scores.pkl"):
             with Pool(8) as p:
                 self.word_scores = dict(
-                    zip(self.valid_scrabble_words, p.map(self.string_score, self.valid_scrabble_words)))
+                    zip(self.valid_scrabble_words, p.map(self.string_score_2, self.valid_scrabble_words)))
             with open("word scores.pkl", 'wb') as file:
                 dump(self.word_scores, file, HIGHEST_PROTOCOL)
         else:
@@ -45,17 +45,20 @@ class Solve:
 
         self.word_graph = DAWG(self.valid_scrabble_words)
 
-    def string_score(self,
-                     solution):  # TODO: optimize string_score so that it can get the value of a word without checking all words in self.valid_scrabble_words
+    def string_score(self, solution):
         """solution is a string that is worth points
-        returns the point value of the string"""
+        returns the point value of the string including subwords"""
 
         return sum(self.word_scores[word] for word in
-                   words_in_string(solution))  # TODO: word in solution must be modified to account for wildcards
+                   self.words_in_string(solution))  # TODO: word in solution must be modified to account for wildcards
+
+    def string_score_2(self, solution):
+        """solution is a string that is worth points
+        returns the point value of the string NOT including subwords"""
+        return sum(self.letter_scores[letter] for letter in solution)
 
     def words_in_string(self, string):
         return {word for x in range(len(string)) for word in self.word_graph.prefixes(string[x:])}
-
 
     def evaluate_part(self, candidate_tiles):
         """candidate_tiles is a tuple of 1 character strings which form a word when concatenated
@@ -75,7 +78,7 @@ class Solve:
         with Pool(8) as p:
             while self.scrabble_tiles:
 
-                possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=2)))
+                possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=6)))
                 best_part = max(possible_part_list, key=part_value)
 
                 print(best_part)
@@ -86,11 +89,11 @@ class Solve:
         return self.test_solution
 
     def get_feasible_parts(
-            self):  # TODO: update get_feasible_parts so that it precomputes a list of possible words in an manner organized such that it is easy to eliminate parts that are no longer feasible when certain letters are no longer available
+            self):  # TODO: update get_feasible_parts to use a DAWG as well
         """returns a set of tuples of 1 character strings which form a valid scrabble word when concatenated
         that can be made from the current set of tiles left"""
         current_tile_count = Counter(self.scrabble_tiles)
-        return {tuple(word) for word in self.valid_scrabble_words if
+        return {word for word in self.valid_scrabble_words if
                 all(current_tile_count[letter] >= Counter(word)[letter] for letter in word)}
 
     def make_solution_method_2(self):
@@ -121,19 +124,13 @@ if __name__ == '__main__':
     freeze_support()
     solver = Solve()
 
-    # run('solution = solver.make_solution_method_2()', sort='cumulative')
-    # print(solver.string_score(solution))
-    # print(solution)
-    # print(len(solution))  # our solution is the right length...
-    # print(Counter(solution))
-    # print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
-    string = "forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin"
-
-
-
-
+    run('solution = solver.make_solution_method_1()', sort='cumulative')
+    print(solver.string_score(solution))
+    print(solution)
+    print(len(solution))  # our solution is the right length...
+    print(Counter(solution))
+    print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
 
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
-# best so far carboxymethylcellulosesforeshadowerspreformattingreawakenednonunionizedequipagedagobavatutiti
-# new best forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
+# best so far forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
