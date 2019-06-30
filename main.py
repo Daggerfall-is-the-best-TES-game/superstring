@@ -22,6 +22,8 @@ class Solve:
         self.test_solution = ""
 
     def string_score(self, solution):
+        """solution is a string that is worth points
+        returns the point value of the string"""
         def score(word):
             letter_scores = {'?': 0,
                              'e': 1, 'a': 1, 'i': 1, 'o': 1, 'n': 1, 'r': 1, 't': 1, 'l': 1, 's': 1, 'u': 1,
@@ -37,41 +39,70 @@ class Solve:
                    word in solution)  # TODO: word in solution must be modified to account for wildcards
 
     def evaluate_part(self, candidate_tiles):
+        """candidate_tiles is a tuple of 1 character strings which form a word when concatenated
+        returns a tuple where the first item is candidate_tiles, and the second item is the point-value
+        of the string that candidate_tiles represents"""
         return candidate_tiles, self.string_score(self.test_solution + "".join(candidate_tiles))
 
-    def make_solution(self):
-        if __name__ == '__main__':
-            freeze_support()
+    def make_solution_method_1(self):
+        """returns a string that is worth as many points as possible"""
+        def part_value(part):
+            return part[1]
 
-            def part_value(part):
-                return part[1]
+        def get_part(part):
+            return part[0]
 
-            def get_part(part):
-                return part[0]
+        with Pool(8) as p:
+            while self.scrabble_tiles:
 
-            with Pool(8) as p:
-                while self.scrabble_tiles:
+                possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=2)))
+                best_part = max(possible_part_list, key=part_value)
 
-                    possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=4)))
-                    best_part = max(possible_part_list, key=part_value)
+                print(best_part)
+                self.test_solution += "".join(get_part(best_part))
+                for tile in get_part(best_part):
+                    self.scrabble_tiles.remove(tile)
+                print(self.test_solution)
+        return self.test_solution
 
-                    print(best_part)
-                    self.test_solution += "".join(get_part(best_part))
-                    for tile in get_part(best_part):
-                        self.scrabble_tiles.remove(tile)
-                    print(self.test_solution)
-            return self.test_solution
+    def get_feasible_parts(self):
+        """returns a set of tuples of 1 character strings which form a valid scrabble word when concatenated
+        that can be made from the current set of tiles left"""
+        current_tile_count = Counter(self.scrabble_tiles)
+        return {tuple(word) for word in self.valid_scrabble_words if
+                all(current_tile_count[letter] >= Counter(word)[letter] for letter in word)}
 
+    def make_solution_method_2(self):
+        """returns a string that is worth as many points as possible"""
+        def part_value(part):
+            return part[1]
+
+        def get_part(part):
+            return part[0]
+
+        with Pool(8) as p:
+            while self.scrabble_tiles:
+                possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts())
+                best_part = max(possible_part_list, key=part_value)
+
+                print(best_part)
+                self.test_solution += "".join(get_part(best_part))
+                for tile in get_part(best_part):
+                    self.scrabble_tiles.remove(tile)
+                print(self.test_solution)
+        return self.test_solution
 
 if __name__ == '__main__':
     freeze_support()
     solver = Solve()
-    solution = solver.make_solution()
+    solution = solver.make_solution_method_2()
 
     print(solver.string_score(solution))
     print(solution)
     print(len(solution))  # our solution is the right length...
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+
+
 
 #best so far boxyowedhowshayspickoffsidescarpingoozedjinnimidemobiterageeventernevertoretaquantalariatailulugul??
