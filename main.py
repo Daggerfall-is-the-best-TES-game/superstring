@@ -29,6 +29,7 @@ class Solve:
                               'k': 5,
                               'j': 8, 'x': 8,
                               'q': 10, 'z': 10}
+        self.word_scores = {word: self.string_score(word) for word in self.valid_scrabble_words}
 
     def string_score(self, solution):
         """solution is a string that is worth points
@@ -40,7 +41,7 @@ class Solve:
         """candidate_tiles is a tuple of 1 character strings which form a word when concatenated
         returns a tuple where the first item is candidate_tiles, and the second item is the point-value
         of the string that candidate_tiles represent"""
-        return candidate_tiles, self.string_score(self.test_solution + "".join(candidate_tiles))
+        return candidate_tiles, self.word_scores[self.test_solution + "".join(candidate_tiles)]
 
     def make_solution_method_1(self):
         """returns a string that is worth as many points as possible"""
