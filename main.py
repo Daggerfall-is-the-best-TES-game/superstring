@@ -83,7 +83,7 @@ class Solve:
         with Pool(8) as p:
             while self.scrabble_tiles:
                 possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts())
-                while possible_part_list:
+                if possible_part_list:
                     best_part = max(possible_part_list, key=part_value)
 
                     print(best_part)
