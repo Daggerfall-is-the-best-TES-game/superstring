@@ -13,11 +13,10 @@ class Solve:
 
     def __init__(self):
         with open('enable1.txt', 'r') as file:
-            self.valid_scrabble_words = {str(string[:x].lower() + string[x:].capitalize())[:y]
-                                         + str(string[:x].lower() + string[x:].capitalize())[y:].capitalize()
-                                         for string in {word.strip() for word in file}
-                                         for x in range(len(string)) for y in range(x, len(string))}
-            self.valid_scrabble_words |= {word.strip() for word in file}
+            self.valid_scrabble_words = set()
+            for string in file:
+                self.valid_scrabble_words |= self.wildcard_it(string.strip())
+                self.valid_scrabble_words.add(string.strip())
 
         self.scrabble_tile_frequencies = {'?': 2,
                                           'e': 12, 'a': 9, 'i': 9, 'o': 8, 'n': 6, 'r': 6, 't': 6, 'l': 4, 's': 4,
@@ -51,7 +50,16 @@ class Solve:
             with open("word scores.pkl", 'rb') as file:
                 self.word_scores = load(file)
 
-        self.word_graph = DAWG(self.valid_scrabble_words)
+        if not isfile('word graph.dawg'):
+            self.word_graph = DAWG(self.valid_scrabble_words)
+            self.word_graph.save('word graph.dawg')
+        else:
+            self.word_graph = DAWG().load('word graph.dawg')
+
+    def wildcard_it(self, string):
+        return {str(string[:x].lower() + string[x:].capitalize())[:y]
+                + str(string[:x].lower() + string[x:].capitalize())[y:].capitalize() for x in range(len(string)) for y
+                in range(x, len(string))}
 
     def string_score(self, solution):
         """solution is a string that is worth points
@@ -130,7 +138,11 @@ class Solve:
 
 if __name__ == '__main__':
     freeze_support()
-    run('solver = Solve()', sort='cumulative')
+    solver = Solve()
+    print([(word, solver.word_scores[word]) for word in solver.words_in_string("BaBy")])
+    print("aBy" in solver.word_graph)
+    print("aBy" in solver.valid_scrabble_words)
+    print(solver.string_score("BaBy"))
 
     # run('solution = solver.make_solution_method_1()', sort='cumulative')
     # print(solver.string_score(solution))
