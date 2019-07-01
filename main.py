@@ -15,7 +15,7 @@ class Solve:
         with open('enable1.txt', 'r') as file:
             self.valid_scrabble_words = set()
             for string in file:
-                # self.valid_scrabble_words |= self.wildcard_it(string.strip())
+                self.valid_scrabble_words |= self.wildcard_it(string.strip())
                 self.valid_scrabble_words.add(string.strip())
 
         self.scrabble_tile_frequencies = {'?': 2,
