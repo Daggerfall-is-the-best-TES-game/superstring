@@ -75,7 +75,7 @@ class Solve:
         def get_part(part):
             return part[0]
 
-        with Pool(8) as p:
+        with Pool(32) as p:
             while self.scrabble_tiles:
 
                 possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=6)))
