@@ -15,7 +15,7 @@ class Solve:
         with open('enable1.txt', 'r') as file:
             self.valid_scrabble_words = set()
             for string in file:
-                self.valid_scrabble_words |= self.wildcard_it(string.strip())
+                # self.valid_scrabble_words |= self.wildcard_it(string.strip())
                 self.valid_scrabble_words.add(string.strip())
 
         self.scrabble_tile_frequencies = {'?': 2,
@@ -27,6 +27,8 @@ class Solve:
                                           'k': 1,
                                           'j': 1, 'x': 1,
                                           'q': 1, 'z': 1}
+        # dummy tiles representing wildcards
+        self.scrabble_tile_frequencies.update(dict.fromkeys("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 2))
         self.scrabble_tiles = [tile for tile in self.scrabble_tile_frequencies for x in
                                range(self.scrabble_tile_frequencies[tile])]
         self.test_solution = ""
@@ -66,7 +68,7 @@ class Solve:
         returns the point value of the string including subwords"""
 
         return sum(self.word_scores[word] for word in
-                   self.words_in_string(solution))  # TODO: word in solution must be modified to account for wildcards
+                   self.words_in_string(solution))
 
     def string_score_2(self, solution):
         """solution is a string that is worth points
@@ -77,10 +79,10 @@ class Solve:
         return {word for x in range(len(string)) for word in self.word_graph.prefixes(string[x:])}
 
     def evaluate_part(self, candidate_tiles):
-        """candidate_tiles is a tuple of 1 character strings which form a word when concatenated
+        """candidate_tiles is a string
         returns a tuple where the first item is candidate_tiles, and the second item is the point-value
         of the string that candidate_tiles represent"""
-        return candidate_tiles, self.string_score(self.test_solution + "".join(candidate_tiles))
+        return candidate_tiles, self.string_score(self.test_solution + candidate_tiles)
 
     def make_solution_method_1(self):
         """returns a string that is worth as many points as possible"""
@@ -94,7 +96,8 @@ class Solve:
         with Pool(32) as p:
             while self.scrabble_tiles:
 
-                possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles, r=4)))
+                possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles,
+                                                                                r=4)))  #doesn't work with wildcard tiles represented by dummy tiles
                 best_part = max(possible_part_list, key=part_value)
 
                 print(best_part)
@@ -104,10 +107,8 @@ class Solve:
                 print(self.test_solution)
         return self.test_solution
 
-    def get_feasible_parts(
-            self):  # TODO: update get_feasible_parts to use a DAWG as well
-        """returns a set of tuples of 1 character strings which form a valid scrabble word when concatenated
-        that can be made from the current set of tiles left"""
+    def get_feasible_parts(self):  # TODO: update get_feasible_parts to use a DAWG as well
+        """returns the set of strings that can be made from the current set of tiles left"""
         current_tile_count = Counter(self.scrabble_tiles)
         return {word for word in self.valid_scrabble_words if
                 all(current_tile_count[letter] >= Counter(word)[letter] for letter in word)}
@@ -129,6 +130,9 @@ class Solve:
                     print(best_part)
                     self.test_solution += "".join(get_part(best_part))
                     for tile in get_part(best_part):
+                        if tile.isupper():
+                            for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                                self.scrabble_tiles.remove(owned_tile)
                         self.scrabble_tiles.remove(tile)
                     print(self.test_solution)
                 else:
@@ -139,20 +143,14 @@ class Solve:
 if __name__ == '__main__':
     freeze_support()
     solver = Solve()
-    print([(word, solver.word_scores[word]) for word in solver.words_in_string("BaBy")])
-    print("aBy" in solver.word_graph)
-    print("aBy" in solver.valid_scrabble_words)
-    print(solver.string_score("BaBy"))
 
-    # run('solution = solver.make_solution_method_1()', sort='cumulative')
-    # print(solver.string_score(solution))
-    # print(solution)
-    # print(len(solution))  # our solution is the right length...
-    # print(Counter(solution))
-    # print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+    run('solution = solver.make_solution_method_2()', sort='cumulative')
+    print(solver.string_score(solution))
+    print(solution)
+    print(len(solution))  # our solution is the right length...
+    print(Counter(solution))
+    print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
 
-    # string = "hello"
-    # print([str(string[:x].lower() + string[x:].capitalize())[:y] + str(string[:x].lower() + string[x:].capitalize())[y:].capitalize() for x in range(len(string)) for y in range(x, len(string))])
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
 # best so far forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
