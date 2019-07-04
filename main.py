@@ -7,6 +7,7 @@ from pickle import dump, load, HIGHEST_PROTOCOL
 from os.path import isfile
 from dawg import DAWG
 from collections import defaultdict
+from heapq import nlargest
 
 
 class Solve:
@@ -130,29 +131,25 @@ class Solve:
 
         with Pool(8) as p:
             while self.scrabble_tiles:
-                possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts(self.valid_scrabble_words))
+                possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
                 if possible_part_list:
-                    possible_part_list.sort(key=part_value)
-                    best_parts = [get_part(part) for part in possible_part_list[
-                                                             len(
-                                                                 possible_part_list) - 100:]]  # get top 1 percent of all parts
-                    possible_part_list = p.map(self.evaluate_part,
-                                               self.get_feasible_parts(self.generate_word_combinations(best_parts,
-                                                                                                       3)))  # TODO: add check to make sure that the permuation can be constructed with the available tiles
-                    best_part = max(possible_part_list, key=part_value)
-                    self.test_solution += get_part(best_part)
-                    print(self.test_solution)
-                    print(self.string_score(self.test_solution))
-                    for tile in get_part(best_part):
-                        if tile.isupper():
-                            for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-                                self.scrabble_tiles.remove(owned_tile)
-                        else:
-                            self.scrabble_tiles.remove(tile)
+                    best_parts = nlargest(100, possible_part_list, self.string_score)  # get top 1 percent of all parts
+                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 3)),
+                                    key=self.string_score)
+                self.test_solution += best_part
+                print(self.test_solution)
+                print(self.string_score(self.test_solution))
+                for tile in best_part:
+                    if tile.isupper():
+                        for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                            self.scrabble_tiles.remove(owned_tile)
+                else:
+                    self.scrabble_tiles.remove(tile)
 
                 else:
-                    break
-        return self.test_solution
+                break
+
+    return self.test_solution
 
 
 if __name__ == '__main__':
@@ -166,7 +163,21 @@ if __name__ == '__main__':
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
 
+    print(solver.string_score(
+        "forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin"))
+    print("forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin")
+    print(solver.string_score(
+        "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut"))
+    print("nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut")
+    print(solver.string_score(
+        "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui"))
+    print("nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui")
+    print(solver.string_score(
+        "autobiographicallyantiferromagnetismsparadichlorobenzeneswindowedovertaskingoxidativelyefqueuejute"))
+    print("autobiographicallyantiferromagnetismsparadichlorobenzeneswindowedovertaskingoxidativelyefqueuejute")
+
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
 # best so far forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
 # new best nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut
 # new new best nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
+# decent but not best autobiographicallyantiferromagnetismsparadichlorobenzeneswindowedovertaskingoxidativelyefqueuejute
