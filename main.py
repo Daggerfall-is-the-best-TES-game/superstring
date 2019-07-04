@@ -132,24 +132,17 @@ class Solve:
     def make_solution_method_2(self):
         """returns a string that is worth as many points as possible"""
 
-        def part_value(part):
-            return part[1]
-
-        def get_part(part):
-            return part[0]
-
-        with Pool(8) as p:
-            while self.scrabble_tiles:
-                possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-                best_parts = nlargest(5000, possible_part_list, self.string_score)  # get top n words
-                if best_parts:
-                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2)),
-                                    key=self.string_score)
-                    self.add_to_solution(best_part)
-                    print(self.test_solution)
-                    print(self.string_score(self.test_solution))
-                else:
-                    break
+        while self.scrabble_tiles:
+            possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
+            best_parts = nlargest(10, possible_part_list, self.string_score)  # get top n words
+            if best_parts:
+                best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 5)),
+                                key=self.string_score)
+                self.add_to_solution(best_part)
+                print(self.test_solution)
+                print(self.string_score(self.test_solution))
+            else:
+                break
 
         return self.test_solution
 
