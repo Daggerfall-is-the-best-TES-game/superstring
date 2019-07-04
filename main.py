@@ -143,11 +143,10 @@ class Solve:
                     if tile.isupper():
                         for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
                             self.scrabble_tiles.remove(owned_tile)
+                    else:
+                        self.scrabble_tiles.remove(tile)
                 else:
-                    self.scrabble_tiles.remove(tile)
-
-                else:
-                break
+                    break
 
     return self.test_solution
 
