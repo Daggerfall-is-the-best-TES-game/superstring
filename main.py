@@ -107,6 +107,15 @@ class Solve:
                 print(self.test_solution)
         return self.test_solution
 
+    def add_to_solution(self, part):
+        self.test_solution += part
+        for tile in part:  # remove used tiles from bag of scrabble tiles
+            if tile.isupper():
+                for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                    self.scrabble_tiles.remove(owned_tile)
+            else:
+                self.scrabble_tiles.remove(tile)
+
     def generate_word_combinations(self, words, max_length):
         """words is a list of words. max_length is a positive integer
         returns a generator of strings composed of permutations of words
@@ -132,19 +141,13 @@ class Solve:
         with Pool(8) as p:
             while self.scrabble_tiles:
                 possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-                best_parts = nlargest(5000, possible_part_list, self.string_score)  # get top 1 percent of all parts
+                best_parts = nlargest(5000, possible_part_list, self.string_score)  # get top n words
                 if best_parts:
                     best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2)),
                                     key=self.string_score)
-                    self.test_solution += best_part
+                    self.add_to_solution(best_part)
                     print(self.test_solution)
                     print(self.string_score(self.test_solution))
-                    for tile in best_part:
-                        if tile.isupper():
-                            for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-                                self.scrabble_tiles.remove(owned_tile)
-                        else:
-                            self.scrabble_tiles.remove(tile)
                 else:
                     break
 
