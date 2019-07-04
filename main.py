@@ -127,7 +127,7 @@ class Solve:
                 if possible_part_list:
                     possible_part_list.sort(key=part_value)
                     best_parts = [get_part(part) for part in possible_part_list[int(
-                        len(possible_part_list) * 0.9999):]]  # get top 1 percent of all parts
+                        len(possible_part_list) - 1000):]]  # get top 1 percent of all parts
                     possible_part_list = p.map(self.evaluate_part,
                                                list("".join(pair) for pair in permutations(best_parts, r=2)))
                     best_part = max(possible_part_list, key=part_value)
