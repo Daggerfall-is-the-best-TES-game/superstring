@@ -106,10 +106,10 @@ class Solve:
                 print(self.test_solution)
         return self.test_solution
 
-    def get_feasible_parts(self):  # TODO: update get_feasible_parts to use a DAWG as well
+    def get_feasible_parts(self, word_list):  # TODO: update get_feasible_parts to use a DAWG as well
         """returns the set of strings that can be made from the current set of tiles left"""
         current_tile_count = Counter(self.scrabble_tiles)
-        return ("".join(words) for words in self.valid_scrabble_words if
+        return (words for words in word_list if
                 all(current_tile_count[letter] >= Counter(words)[letter] for letter in words))
 
     def make_solution_method_2(self):
@@ -123,16 +123,20 @@ class Solve:
 
         with Pool(8) as p:
             while self.scrabble_tiles:
-                possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts())
+                possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts(self.valid_scrabble_words))
                 if possible_part_list:
                     possible_part_list.sort(key=part_value)
-                    best_parts = [get_part(part) for part in possible_part_list[int(
-                        len(possible_part_list) - 1000):]]  # get top 1 percent of all parts
+                    best_parts = [get_part(part) for part in possible_part_list[
+                                                             len(
+                                                                 possible_part_list) - 1000:]]  # get top 1 percent of all parts
                     possible_part_list = p.map(self.evaluate_part,
-                                               list("".join(pair) for pair in permutations(best_parts, r=2)))
+                                               self.get_feasible_parts(list("".join(pair) for pair in
+                                                                            permutations(best_parts,
+                                                                                         r=2))))  # TODO: add check to make sure that the permuation can be constructed with the available tiles
                     best_part = max(possible_part_list, key=part_value)
-                    self.test_solution += "".join(get_part(best_part))
+                    self.test_solution += get_part(best_part)
                     print(self.test_solution)
+                    print(self.string_score(self.test_solution))
                     for tile in get_part(best_part):
                         if tile.isupper():
                             for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
