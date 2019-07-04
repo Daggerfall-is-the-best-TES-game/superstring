@@ -1,4 +1,4 @@
-from random import shuffle, choice
+from random import shuffle, choice, randrange
 from collections import Counter
 from itertools import permutations, product
 from multiprocessing import Pool, freeze_support
@@ -15,11 +15,10 @@ class Solve:
         with open('enable1.txt', 'r') as file:
             self.valid_scrabble_words = set()
             for string in file:
-                self.valid_scrabble_words |= self.wildcard_it(string.strip())
+                # self.valid_scrabble_words |= self.wildcard_it(string.strip())
                 self.valid_scrabble_words.add(string.strip())
 
-        self.scrabble_tile_frequencies = {'?': 2,
-                                          'e': 12, 'a': 9, 'i': 9, 'o': 8, 'n': 6, 'r': 6, 't': 6, 'l': 4, 's': 4,
+        self.scrabble_tile_frequencies = {'e': 12, 'a': 9, 'i': 9, 'o': 8, 'n': 6, 'r': 6, 't': 6, 'l': 4, 's': 4,
                                           'u': 4,
                                           'd': 4, 'g': 3,
                                           'b': 2, 'c': 2, 'm': 2, 'p': 2,
@@ -110,8 +109,8 @@ class Solve:
     def get_feasible_parts(self):  # TODO: update get_feasible_parts to use a DAWG as well
         """returns the set of strings that can be made from the current set of tiles left"""
         current_tile_count = Counter(self.scrabble_tiles)
-        return {word for word in self.valid_scrabble_words if
-                all(current_tile_count[letter] >= Counter(word)[letter] for letter in word)}
+        return ("".join(words) for words in self.valid_scrabble_words if
+                all(current_tile_count[letter] >= Counter(words)[letter] for letter in words))
 
     def make_solution_method_2(self):
         """returns a string that is worth as many points as possible"""
@@ -126,15 +125,21 @@ class Solve:
             while self.scrabble_tiles:
                 possible_part_list = p.map(self.evaluate_part, self.get_feasible_parts())
                 if possible_part_list:
+                    possible_part_list.sort(key=part_value)
+                    best_parts = [get_part(part) for part in possible_part_list[int(
+                        len(possible_part_list) * 0.99):]]  # get top 1 percent of all parts
+                    possible_part_list = p.map(self.evaluate_part,
+                                               list("".join(pair) for pair in permutations(best_parts, r=2)))
                     best_part = max(possible_part_list, key=part_value)
-                    print(best_part)
                     self.test_solution += "".join(get_part(best_part))
+                    print(self.test_solution)
                     for tile in get_part(best_part):
                         if tile.isupper():
                             for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
                                 self.scrabble_tiles.remove(owned_tile)
-                        self.scrabble_tiles.remove(tile)
-                    print(self.test_solution)
+                        else:
+                            self.scrabble_tiles.remove(tile)
+
                 else:
                     break
         return self.test_solution
@@ -150,6 +155,7 @@ if __name__ == '__main__':
     print(len(solution))  # our solution is the right length...
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+
 
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
