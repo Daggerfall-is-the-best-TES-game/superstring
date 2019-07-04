@@ -109,10 +109,10 @@ class Solve:
 
     def generate_word_combinations(self, words, max_length):
         """words is a list of words. max_length is a positive integer
-        returns a list of strings composed of permutations of words
+        returns a generator of strings composed of permutations of words
         for each length up to the length specified by maxlength"""
-        return list("".join(word_tuple) for word_tuple in
-                    chain.from_iterable(permutations(words, r=length) for length in range(1, max_length + 1)))
+        return ("".join(word_tuple) for word_tuple in
+                chain.from_iterable(permutations(words, r=length) for length in range(1, max_length + 1)))
 
     def get_feasible_parts(self, word_list):  # TODO: update get_feasible_parts to use a DAWG as well
         """returns the set of strings that can be made from the current set of tiles left"""
@@ -132,19 +132,19 @@ class Solve:
         with Pool(8) as p:
             while self.scrabble_tiles:
                 possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-                if possible_part_list:
-                    best_parts = nlargest(100, possible_part_list, self.string_score)  # get top 1 percent of all parts
-                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 3)),
+                best_parts = nlargest(30, possible_part_list, self.string_score)  # get top 1 percent of all parts
+                if best_parts:
+                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 5)),
                                     key=self.string_score)
-                self.test_solution += best_part
-                print(self.test_solution)
-                print(self.string_score(self.test_solution))
-                for tile in best_part:
-                    if tile.isupper():
-                        for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-                            self.scrabble_tiles.remove(owned_tile)
-                    else:
-                        self.scrabble_tiles.remove(tile)
+                    self.test_solution += best_part
+                    print(self.test_solution)
+                    print(self.string_score(self.test_solution))
+                    for tile in best_part:
+                        if tile.isupper():
+                            for owned_tile in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                                self.scrabble_tiles.remove(owned_tile)
+                        else:
+                            self.scrabble_tiles.remove(tile)
                 else:
                     break
 
@@ -161,19 +161,6 @@ if __name__ == '__main__':
     print(len(solution))  # our solution is the right length...
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
-
-    print(solver.string_score(
-        "forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin"))
-    print("forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin")
-    print(solver.string_score(
-        "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut"))
-    print("nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut")
-    print(solver.string_score(
-        "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui"))
-    print("nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui")
-    print(solver.string_score(
-        "autobiographicallyantiferromagnetismsparadichlorobenzeneswindowedovertaskingoxidativelyefqueuejute"))
-    print("autobiographicallyantiferromagnetismsparadichlorobenzeneswindowedovertaskingoxidativelyefqueuejute")
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
 # best so far forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
