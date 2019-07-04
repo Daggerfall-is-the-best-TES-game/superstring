@@ -1,6 +1,6 @@
 from random import shuffle, choice, randrange
 from collections import Counter
-from itertools import permutations, product
+from itertools import permutations, chain
 from multiprocessing import Pool, freeze_support
 from cProfile import run
 from pickle import dump, load, HIGHEST_PROTOCOL
@@ -13,7 +13,7 @@ class Solve:
 
     def __init__(self):
         with open('enable1.txt', 'r') as file:
-            self.valid_scrabble_words = set()
+            self.valid_scrabble_words = set()  # could use chain.from_iterable here when we start using wildcards again
             for string in file:
                 # self.valid_scrabble_words |= self.wildcard_it(string.strip())
                 self.valid_scrabble_words.add(string.strip())
@@ -96,7 +96,7 @@ class Solve:
             while self.scrabble_tiles:
 
                 possible_part_list = p.map(self.evaluate_part, set(permutations(self.scrabble_tiles,
-                                                                                r=4)))  #doesn't work with wildcard tiles represented by dummy tiles
+                                                                                r=4)))  # doesn't work with wildcard tiles represented by dummy tiles
                 best_part = max(possible_part_list, key=part_value)
 
                 print(best_part)
@@ -105,6 +105,13 @@ class Solve:
                     self.scrabble_tiles.remove(tile)
                 print(self.test_solution)
         return self.test_solution
+
+    def generate_word_combinations(self, words, max_length):
+        """words is a list of words. max_length is a positive integer
+        returns a list of strings composed of permutations of words
+        for each length up to the length specified by maxlength"""
+        return list("".join(word_tuple) for word_tuple in
+                    chain.from_iterable(permutations(words, r=length) for length in range(1, max_length + 1)))
 
     def get_feasible_parts(self, word_list):  # TODO: update get_feasible_parts to use a DAWG as well
         """returns the set of strings that can be made from the current set of tiles left"""
@@ -128,11 +135,10 @@ class Solve:
                     possible_part_list.sort(key=part_value)
                     best_parts = [get_part(part) for part in possible_part_list[
                                                              len(
-                                                                 possible_part_list) - 1000:]]  # get top 1 percent of all parts
+                                                                 possible_part_list) - 100:]]  # get top 1 percent of all parts
                     possible_part_list = p.map(self.evaluate_part,
-                                               self.get_feasible_parts(list("".join(pair) for pair in
-                                                                            permutations(best_parts,
-                                                                                         r=2))))  # TODO: add check to make sure that the permuation can be constructed with the available tiles
+                                               self.get_feasible_parts(self.generate_word_combinations(best_parts,
+                                                                                                       3)))  # TODO: add check to make sure that the permuation can be constructed with the available tiles
                     best_part = max(possible_part_list, key=part_value)
                     self.test_solution += get_part(best_part)
                     print(self.test_solution)
@@ -160,7 +166,7 @@ if __name__ == '__main__':
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
 
-
-
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
 # best so far forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
+# new best nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut
+# new new best nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
