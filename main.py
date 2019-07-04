@@ -132,9 +132,9 @@ class Solve:
         with Pool(8) as p:
             while self.scrabble_tiles:
                 possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-                best_parts = nlargest(30, possible_part_list, self.string_score)  # get top 1 percent of all parts
+                best_parts = nlargest(5000, possible_part_list, self.string_score)  # get top 1 percent of all parts
                 if best_parts:
-                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 5)),
+                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2)),
                                     key=self.string_score)
                     self.test_solution += best_part
                     print(self.test_solution)
@@ -155,15 +155,16 @@ if __name__ == '__main__':
     freeze_support()
     solver = Solve()
 
+    best = "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui"
     run('solution = solver.make_solution_method_2()', sort='cumulative')
-    print(solver.string_score(solution))
+    print(f"score is {solver.string_score(solution)}")
     print(solution)
-    print(len(solution))  # our solution is the right length...
+    print(f"length of solution:{len(solution)}")  # our solution is the right length...
     print(Counter(solution))
     print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+    print(f"There is a new best? {solver.string_score(solution) > solver.string_score(best)}")
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
-# best so far forethoughtfulnessescodevelopersdecarboxylatedoverelaboratedouttrumpingawakeningamainzayin
-# new best nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugateitut
-# new new best nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
-# decent but not best autobiographicallyantiferromagnetismsparadichlorobenzeneswindowedovertaskingoxidativelyefqueuejute
+# best so far nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
+
+# psychopathologicallynondenominationalismsdeoxidizersreawakenedquarteragereviewerbuffobijugateutit
