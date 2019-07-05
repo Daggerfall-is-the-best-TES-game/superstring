@@ -146,20 +146,35 @@ class Solve:
 
         return self.test_solution
 
+    def make_solution_method_3(self):
+        """returns a string that is worth as many points as possible"""
+
+        while self.scrabble_tiles:
+            possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
+            best_parts = nlargest(10, possible_part_list, self.evaluate_part)  # get top n words
+            if best_parts:
+                best_part = choice(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2)))
+                self.add_to_solution(best_part)
+                print(self.test_solution)
+                print(self.string_score(self.test_solution))
+            else:
+                break
+
+        return self.test_solution
 
 
 if __name__ == '__main__':
     freeze_support()
     solver = Solve()
 
-    best = "CAnondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui"
-    # run('solution = solver.make_solution_method_2()', sort='cumulative')
-    # print(f"score is {solver.string_score(solution)}")
-    # print(solution)
-    # print(f"length of solution:{len(solution)}")  # our solution is the right length...
-    # print(Counter(solution))
-    # print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
-    # print(f"There is a new best? {solver.string_score(solution) > solver.string_score(best)}")
+    best = "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui"
+    run('solution = solver.make_solution_method_3()', sort='cumulative')
+    print(f"score is {solver.string_score(solution)}")
+    print(solution)
+    print(f"length of solution:{len(solution)}")  # our solution is the right length...
+    print(Counter(solution))
+    print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+    print(f"There is a new best? {solver.string_score(solution) > solver.string_score(best)}")
     print(solver.string_score(best))
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
