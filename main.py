@@ -87,9 +87,9 @@ class Solve:
 
     def evaluate_part(self, candidate_tiles):
         """candidate_tiles is a string
-        returns a tuple where the first item is candidate_tiles, and the second item is the point-value
+        returns a point-value
         of the string that candidate_tiles represent"""
-        return candidate_tiles, self.string_score(self.test_solution + candidate_tiles)
+        return self.string_score_3(self.test_solution + candidate_tiles)
 
     def make_solution_method_1(self):
         """returns a string that is worth as many points as possible"""
@@ -141,10 +141,10 @@ class Solve:
 
         while self.scrabble_tiles:
             possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-            best_parts = nlargest(300, possible_part_list, self.string_score_3)  # get top n words
+            best_parts = nlargest(300, possible_part_list, self.evaluate_part)  # get top n words
             if best_parts:
                 best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 3)),
-                                key=self.string_score_3)
+                                key=self.evaluate_part)
                 self.add_to_solution(best_part)
                 print(self.test_solution)
                 print(self.string_score(self.test_solution))
@@ -171,3 +171,4 @@ if __name__ == '__main__':
 # best so far nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
 
 # psychopathologicallynondenominationalismsdeoxidizersreawakenedquarteragereviewerbuffobijugateutit
+# best with wildcards added manually CAnondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
