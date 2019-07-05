@@ -58,6 +58,11 @@ class Solve:
         else:
             self.word_graph = DAWG().load('word graph.dawg')
 
+    def reset(self):
+        self.test_solution = ""
+        self.scrabble_tiles = [tile for tile in self.scrabble_tile_frequencies for x in
+                               range(self.scrabble_tile_frequencies[tile])]
+
     def wildcard_it(self, string):
         return {str(string[:x].lower() + string[x:].capitalize())[:y]
                 + str(string[:x].lower() + string[x:].capitalize())[y:].capitalize() for x in range(len(string)) for y
@@ -153,8 +158,13 @@ class Solve:
             possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
             best_parts = nlargest(10, possible_part_list, self.evaluate_part)  # get top n words
             if best_parts:
-                best_part = choice(list(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2))))
-                self.add_to_solution(best_part)
+                if len(self.test_solution < 50):
+                    best_part = choice(list(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2))))
+                    self.add_to_solution(best_part)
+                else:
+                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2)),
+                                    key=self.evaluate_part)
+                    self.add_to_solution(best_part)
                 print(self.test_solution)
                 print(self.string_score(self.test_solution))
             else:
@@ -167,18 +177,28 @@ if __name__ == '__main__':
     freeze_support()
     solver = Solve()
 
-    best = "nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui"
-    run('solution = solver.make_solution_method_3()', sort='cumulative')
-    print(f"score is {solver.string_score(solution)}")
-    print(solution)
-    print(f"length of solution:{len(solution)}")  # our solution is the right length...
-    print(Counter(solution))
-    print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
-    print(f"There is a new best? {solver.string_score(solution) > solver.string_score(best)}")
-    print(solver.string_score(best))
+    best = "zoogeographicallynondenominationalismsprequalificationswitheredforejudgedextravertskatawebbyvee"
+
+    while 1:
+        solution = solver.make_solution_method_3()
+        print(f"score is {solver.string_score(solution)}")
+        print(solution)
+        print(f"length of solution:{len(solution)}")  # our solution is the right length...
+        print(Counter(solution))
+        print(Counter(solution) == solver.scrabble_tile_frequencies)  # ... with the right letters
+        print(f"There is a new best? {solver.string_score(solution) > solver.string_score(best)}")
+        print(solver.string_score(best))
+        print(best)
+        if solver.string_score(solution) > solver.string_score(best):
+            best = solution
+        solver.reset()
+
+
 
 # TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
 # best so far nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
 
 # psychopathologicallynondenominationalismsdeoxidizersreawakenedquarteragereviewerbuffobijugateutit
 # best with wildcards added manually CAnondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
+# new best forethoughtfulnessesimpersonalizedpremaxillaryreawakeningreacquaintingavowedoutdebatedboyojoti
+# newest best zoogeographicallynondenominationalismsprequalificationswitheredforejudgedextravertskatawebbyvee
