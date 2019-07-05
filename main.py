@@ -75,6 +75,13 @@ class Solve:
         returns the point value of the string NOT including subwords"""
         return sum(self.letter_scores[letter] for letter in solution)
 
+    def string_score_3(self, solution):
+        """solution is a string that is worth points
+        returns the point value of the string including subwords
+        divided by the value of the tiles used"""
+        return sum(self.word_scores[word] for word in
+                   self.words_in_string(solution)) / self.string_score_2(solution)
+
     def words_in_string(self, string):
         return {word for x in range(len(string)) for word in self.word_graph.prefixes(string[x:])}
 
@@ -134,10 +141,10 @@ class Solve:
 
         while self.scrabble_tiles:
             possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-            best_parts = nlargest(10, possible_part_list, self.string_score)  # get top n words
+            best_parts = nlargest(300, possible_part_list, self.string_score_3)  # get top n words
             if best_parts:
-                best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 5)),
-                                key=self.string_score)
+                best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 3)),
+                                key=self.string_score_3)
                 self.add_to_solution(best_part)
                 print(self.test_solution)
                 print(self.string_score(self.test_solution))
