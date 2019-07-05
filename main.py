@@ -156,15 +156,11 @@ class Solve:
 
         while self.scrabble_tiles:
             possible_part_list = self.get_feasible_parts(self.valid_scrabble_words)
-            best_parts = nlargest(10, possible_part_list, self.evaluate_part)  # get top n words
+            best_parts = nlargest(int(20 - len(self.test_solution) / 5), possible_part_list,
+                                  self.evaluate_part)  # get top n words
             if best_parts:
-                if len(self.test_solution) < 50:
-                    best_part = choice(list(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2))))
-                    self.add_to_solution(best_part)
-                else:
-                    best_part = max(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2)),
-                                    key=self.evaluate_part)
-                    self.add_to_solution(best_part)
+                best_part = choice(list(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2))))
+                self.add_to_solution(best_part)
                 print(self.test_solution)
                 print(self.string_score(self.test_solution))
             else:
@@ -202,3 +198,4 @@ if __name__ == '__main__':
 # best with wildcards added manually CAnondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
 # new best forethoughtfulnessesimpersonalizedpremaxillaryreawakeningreacquaintingavowedoutdebatedboyojoti
 # newest best zoogeographicallynondenominationalismsprequalificationswitheredforejudgedextravertskatawebbyvee
+# newer newest best psychopathologicallyoverdifferentiationsemblazonersreawakenedexurbanitesquiredunavowedagoutitijig
