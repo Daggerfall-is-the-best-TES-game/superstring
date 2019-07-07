@@ -128,7 +128,7 @@ class Solve:
         return ("".join(word_tuple) for word_tuple in
                 chain.from_iterable(permutations(words, r=length) for length in range(1, max_length + 1)))
 
-    def get_feasible_parts(self, word_list):  # TODO: update get_feasible_parts to use a DAWG as well
+    def get_feasible_parts(self, word_list):
         """returns the set of strings that can be made from the current set of tiles left"""
         current_tile_count = Counter(self.scrabble_tiles)
         return (words for words in word_list if
@@ -159,7 +159,7 @@ class Solve:
             best_parts = nlargest(int(20 - len(self.test_solution) / 5), possible_part_list,
                                   self.evaluate_part)  # get top n words
             if best_parts:
-                best_part = choice(list(self.get_feasible_parts(self.generate_word_combinations(best_parts, 2))))
+                best_part = choice(list(self.get_feasible_parts(self.generate_word_combinations(best_parts, 3))))
                 self.add_to_solution(best_part)
                 print(self.test_solution)
                 print(self.string_score(self.test_solution))
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     freeze_support()
     solver = Solve()
 
-    best = "zoogeographicallynondenominationalismsprequalificationswitheredforejudgedextravertskatawebbyvee"
+    best = "forethoughtfulnessesdecarboxylationsprepackagedimmaterializedoverelaboratedjinniavowingyowequint"
 
     while 1:
         solution = solver.make_solution_method_3()
@@ -189,13 +189,5 @@ if __name__ == '__main__':
             best = solution
         solver.reset()
 
-
-
-# TODO: profile method 2 and possible update it to search through combinations of two valid scrabble words at a time
-# best so far nondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
-
-# psychopathologicallynondenominationalismsdeoxidizersreawakenedquarteragereviewerbuffobijugateutit
-# best with wildcards added manually CAnondenominationalismspsychopathologicallyreawakeneddeoxidizersquarteragereviewerbuffobijugatetui
-# new best forethoughtfulnessesimpersonalizedpremaxillaryreawakeningreacquaintingavowedoutdebatedboyojoti
-# newest best zoogeographicallynondenominationalismsprequalificationswitheredforejudgedextravertskatawebbyvee
-# newer newest best psychopathologicallyoverdifferentiationsemblazonersreawakenedexurbanitesquiredunavowedagoutitijig
+# best forethoughtfulnessesdecarboxylationsprepackagedimmaterializedoverelaboratedjinniavowingyowequint
+# best with wildcards AforethoughtfulnessesdecarboxylationsprepackagedimmaterializedoverelaboratedjinniavowingyowequintiN
